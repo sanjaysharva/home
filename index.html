@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Solar Tracker Control</title>
+
+
+<style>
+
+/* =====================================================
+   GLOBAL
+===================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+
+    margin: 0;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background: #080808;
+
+    color: white;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+header {
+
+    padding: 22px;
+
+    text-align: center;
+
+    background: #111;
+
+    border-bottom: 1px solid #333;
+
+}
+
+header h1 {
+
+    margin: 0;
+
+    font-size: 30px;
+
+    color: #ff9d00;
+
+}
+
+header p {
+
+    margin: 8px 0 15px;
+
+    color: #aaa;
+
+}
+
+
+/* =====================================================
+   MAIN CONTAINER
+===================================================== */
+
+.container {
+
+    max-width: 1250px;
+
+    margin: auto;
+
+    padding: 20px;
+
+}
+
+
+/* =====================================================
+   GRID
+===================================================== */
+
+.grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(330px, 1fr));
+
+    gap: 20px;
+
+}
+
+
+/* =====================================================
+   CARDS
+===================================================== */
+
+.card {
+
+    background: #121212;
+
+    border: 1px solid #292929;
+
+    border-radius: 15px;
+
+    padding: 20px;
+
+    box-shadow:
+        0 5px 20px rgba(0,0,0,0.5);
+
+}
+
+.card h2 {
+
+    margin-top: 0;
+
+    color: #ff9d00;
+
+    font-size: 21px;
+
+}
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+button {
+
+    border: none;
+
+    border-radius: 10px;
+
+    padding: 12px 18px;
+
+    margin: 5px;
+
+    font-size: 16px;
+
+    cursor: pointer;
+
+    background: #252525;
+
+    color: white;
+
+    transition: 0.15s;
+
+}
+
+button:hover {
+
+    background: #3a3a3a;
+
+    transform: scale(1.03);
+
+}
+
+.connect {
+
+    background: #ff8c00;
+
+    color: black;
+
+    font-weight: bold;
+
+}
+
+.connect:hover {
+
+    background: #ffa52b;
+
+}
+
+.auto {
+
+    background: #008f5a;
+
+    font-weight: bold;
+
+}
+
+.manual {
+
+    background: #9e3030;
+
+    font-weight: bold;
+
+}
+
+
+/* =====================================================
+   CONNECTION
+===================================================== */
+
+#connection {
+
+    margin-top: 10px;
+
+    color: #00ff88;
+
+    font-weight: bold;
+
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+.status {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 12px;
+
+    margin: 8px 0;
+
+    background: #1b1b1b;
+
+    border-radius: 10px;
+
+}
+
+.value {
+
+    font-weight: bold;
+
+}
+
+.balanced {
+
+    color: #00ff88;
+
+    font-weight: bold;
+
+}
+
+.not-balanced {
+
+    color: #ff5555;
+
+    font-weight: bold;
+
+}
+
+
+/* =====================================================
+   LDR GRID
+===================================================== */
+
+.ldr-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 12px;
+
+}
+
+.ldr {
+
+    background: #1b1b1b;
+
+    padding: 18px;
+
+    border-radius: 12px;
+
+    text-align: center;
+
+    border: 1px solid #292929;
+
+}
+
+.ldr h3 {
+
+    margin: 0;
+
+    color: #ff9d00;
+
+    font-size: 20px;
+
+}
+
+.resistance {
+
+    font-size: 24px;
+
+    margin-top: 10px;
+
+    color: white;
+
+    font-weight: bold;
+
+}
+
+
+/* =====================================================
+   WHEATSTONE BRIDGE
+===================================================== */
+
+.wheatstone {
+
+    position: relative;
+
+    width: 100%;
+
+    max-width: 760px;
+
+    height: 600px;
+
+    margin: 10px auto;
+
+    background:
+        radial-gradient(
+            circle at center,
+            #171717 0%,
+            #0b0b0b 72%
+        );
+
+    border: 1px solid #292929;
+
+    border-radius: 15px;
+
+    overflow: hidden;
+
+}
+
+
+/* =====================================================
+   BRIDGE WIRES
+===================================================== */
+
+.wire {
+
+    position: absolute;
+
+    height: 4px;
+
+    background: #888;
+
+    transform-origin: center;
+
+}
+
+
+/* Upper left */
+
+.wire-tl {
+
+    width: 210px;
+
+    left: 130px;
+
+    top: 120px;
+
+    transform: rotate(28deg);
+
+}
+
+
+/* Upper right */
+
+.wire-tr {
+
+    width: 210px;
+
+    right: 130px;
+
+    top: 120px;
+
+    transform: rotate(-28deg);
+
+}
+
+
+/* Lower left */
+
+.wire-bl {
+
+    width: 210px;
+
+    left: 130px;
+
+    bottom: 120px;
+
+    transform: rotate(-28deg);
+
+}
+
+
+/* Lower right */
+
+.wire-br {
+
+    width: 210px;
+
+    right: 130px;
+
+    bottom: 120px;
+
+    transform: rotate(28deg);
+
+}
+
+
+/* =====================================================
+   CENTER BRIDGE CONNECTION
+===================================================== */
+
+.center-left {
+
+    position: absolute;
+
+    width: 155px;
+
+    height: 4px;
+
+    left: 50%;
+
+    top: 300px;
+
+    transform:
+        translateX(-100%);
+
+    background: #888;
+
+}
+
+
+.center-right {
+
+    position: absolute;
+
+    width: 155px;
+
+    height: 4px;
+
+    left: 50%;
+
+    top: 300px;
+
+    background: #888;
+
+}
+
+
+/* =====================================================
+   CENTER METER LINE
+===================================================== */
+
+.meter-line {
+
+    position: absolute;
+
+    width: 4px;
+
+    height: 85px;
+
+    left: 50%;
+
+    top: 300px;
+
+    transform:
+        translateX(-50%);
+
+    background: #ff9d00;
+
+}
+
+
+/* =====================================================
+   NODES
+===================================================== */
+
+.node {
+
+    position: absolute;
+
+    width: 16px;
+
+    height: 16px;
+
+    border-radius: 50%;
+
+    background: #ff9d00;
+
+    border: 3px solid #111;
+
+    box-shadow:
+        0 0 10px rgba(255,157,0,0.8);
+
+    z-index: 20;
+
+}
+
+
+/* Top */
+
+.node-top {
+
+    left: 50%;
+
+    top: 75px;
+
+    transform:
+        translateX(-50%);
+
+}
+
+
+/* Left */
+
+.node-left {
+
+    left: 50%;
+
+    top: 292px;
+
+    transform:
+        translateX(-50%);
+
+}
+
+
+/* Right */
+
+.node-right {
+
+    right: 50%;
+
+    top: 292px;
+
+    transform:
+        translateX(50%);
+
+}
+
+
+/* Bottom */
+
+.node-bottom {
+
+    left: 50%;
+
+    bottom: 75px;
+
+    transform:
+        translateX(-50%);
+
+}
+
+
+/* =====================================================
+   RESISTOR BOXES
+===================================================== */
+
+.bridge-resistor {
+
+    position: absolute;
+
+    width: 145px;
+
+    min-height: 90px;
+
+    background: #171717;
+
+    border: 2px solid #ff9d00;
+
+    border-radius: 10px;
+
+    padding: 10px;
+
+    text-align: center;
+
+    z-index: 30;
+
+    box-shadow:
+        0 0 15px rgba(255,157,0,0.12);
+
+}
+
+
+/* R1 */
+
+.resistor-r1 {
+
+    left: 45px;
+
+    top: 170px;
+
+}
+
+
+/* R2 */
+
+.resistor-r2 {
+
+    right: 45px;
+
+    top: 170px;
+
+}
+
+
+/* R3 */
+
+.resistor-r3 {
+
+    left: 45px;
+
+    bottom: 170px;
+
+}
+
+
+/* R4 */
+
+.resistor-r4 {
+
+    right: 45px;
+
+    bottom: 170px;
+
+}
+
+
+/* =====================================================
+   RESISTOR SYMBOL
+===================================================== */
+
+.resistor-symbol {
+
+    display: inline-block;
+
+    padding: 7px 17px;
+
+    margin-bottom: 8px;
+
+    background: #242424;
+
+    border: 2px solid #aaa;
+
+    border-radius: 5px;
+
+    font-weight: bold;
+
+}
+
+.resistor-value {
+
+    color: #ffb13b;
+
+    font-size: 15px;
+
+}
+
+
+/* =====================================================
+   POWER
+===================================================== */
+
+.supply {
+
+    position: absolute;
+
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    color: #00ff88;
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+}
+
+.top-supply {
+
+    top: 25px;
+
+}
+
+
+/* =====================================================
+   GROUND
+===================================================== */
+
+.ground {
+
+    position: absolute;
+
+    left: 50%;
+
+    bottom: 25px;
+
+    transform:
+        translateX(-50%);
+
+    text-align: center;
+
+    color: #aaa;
+
+    font-size: 14px;
+
+}
+
+.ground-symbol {
+
+    font-size: 30px;
+
+    line-height: 25px;
+
+}
+
+
+/* =====================================================
+   VOLTAGE / CENTER METER
+===================================================== */
+
+.meter {
+
+    position: absolute;
+
+    left: 50%;
+
+    top: 395px;
+
+    transform:
+        translateX(-50%);
+
+    width: 130px;
+
+    padding: 12px;
+
+    text-align: center;
+
+    background: #101010;
+
+    border: 2px solid #ff9d00;
+
+    border-radius: 10px;
+
+    z-index: 40;
+
+}
+
+.meter-title {
+
+    color: #aaa;
+
+    font-size: 13px;
+
+}
+
+.meter-value {
+
+    color: #00ff88;
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    margin-top: 5px;
+
+}
+
+
+/* =====================================================
+   BRIDGE INFORMATION
+===================================================== */
+
+.bridge-info {
+
+    position: absolute;
+
+    left: 50%;
+
+    bottom: 25px;
+
+    transform:
+        translateX(-50%);
+
+    display: flex;
+
+    gap: 22px;
+
+    background: #111;
+
+    border: 1px solid #333;
+
+    border-radius: 10px;
+
+    padding: 10px 16px;
+
+    z-index: 50;
+
+}
+
+.bridge-info div {
+
+    text-align: center;
+
+}
+
+.bridge-info span {
+
+    display: block;
+
+    font-size: 11px;
+
+    color: #888;
+
+}
+
+.bridge-info strong {
+
+    display: block;
+
+    color: #ff9d00;
+
+    margin-top: 4px;
+
+}
+
+
+/* =====================================================
+   SERVO CONTROL
+===================================================== */
+
+.controller {
+
+    text-align: center;
+
+    margin-top: 20px;
+
+}
+
+.arrow {
+
+    width: 75px;
+
+    height: 62px;
+
+    font-size: 30px;
+
+    padding: 0;
+
+}
+
+.arrow:hover {
+
+    background: #ff8c00;
+
+    color: black;
+
+}
+
+.position {
+
+    margin-top: 15px;
+
+    font-size: 18px;
+
+    line-height: 1.8;
+
+}
+
+
+/* =====================================================
+   SERIAL LOG
+===================================================== */
+
+#log {
+
+    height: 200px;
+
+    overflow-y: auto;
+
+    background: #000;
+
+    border-radius: 10px;
+
+    padding: 12px;
+
+    font-family: monospace;
+
+    font-size: 13px;
+
+    color: #00ff88;
+
+    border: 1px solid #222;
+
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media(max-width: 700px) {
+
+    .wheatstone {
+
+        height: 550px;
+
+        transform: scale(0.9);
+
+        transform-origin: top center;
+
+        margin-bottom: -40px;
+
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<header>
+
+    <h1>☀ SOLAR TRACKER</h1>
+
+    <p>
+        Arduino • 4 LDR • Wheatstone Bridge • 2-Axis Servo
+    </p>
+
+    <button
+        class="connect"
+        onclick="connectArduino()">
+
+        CONNECT ARDUINO
+
+    </button>
+
+    <div id="connection">
+
+        Not connected
+
+    </div>
+
+</header>
+
+
+
+<div class="container">
+
+
+<div class="grid">
+
+
+
+<!-- =====================================================
+     SYSTEM STATUS
+===================================================== -->
+
+<div class="card">
+
+    <h2>System Status</h2>
+
+
+    <div class="status">
+
+        <span>Mode</span>
+
+        <span
+            id="mode"
+            class="value">
+
+            ---
+
+        </span>
+
+    </div>
+
+
+    <div class="status">
+
+        <span>Balance</span>
+
+        <span
+            id="balance"
+            class="value">
+
+            ---
+
+        </span>
+
+    </div>
+
+
+    <div class="status">
+
+        <span>Difference</span>
+
+        <span
+            id="difference"
+            class="value">
+
+            ---
+
+        </span>
+
+    </div>
+
+
+    <div class="status">
+
+        <span>Horizontal Servo</span>
+
+        <span
+            id="posH"
+            class="value">
+
+            ---
+
+        </span>
+
+    </div>
+
+
+    <div class="status">
+
+        <span>Vertical Servo</span>
+
+        <span
+            id="posV"
+            class="value">
+
+            ---
+
+        </span>
+
+    </div>
+
+
+    <br>
+
+
+    <button
+        class="auto"
+        onclick="setAuto()">
+
+        AUTO
+
+    </button>
+
+
+    <button
+        class="manual"
+        onclick="setManual()">
+
+        MANUAL
+
+    </button>
+
+</div>
+
+
+
+<!-- =====================================================
+     LDR VALUES
+===================================================== -->
+
+<div class="card">
+
+    <h2>LDR Resistance</h2>
+
+
+    <div class="ldr-grid">
+
+
+        <div class="ldr">
+
+            <h3>R1</h3>
+
+            <div
+                class="resistance"
+                id="R1">
+
+                ---
+
+            </div>
+
+            Ω
+
+        </div>
+
+
+        <div class="ldr">
+
+            <h3>R2</h3>
+
+            <div
+                class="resistance"
+                id="R2">
+
+                ---
+
+            </div>
+
+            Ω
+
+        </div>
+
+
+        <div class="ldr">
+
+            <h3>R3</h3>
+
+            <div
+                class="resistance"
+                id="R3">
+
+                ---
+
+            </div>
+
+            Ω
+
+        </div>
+
+
+        <div class="ldr">
+
+            <h3>R4</h3>
+
+            <div
+                class="resistance"
+                id="R4">
+
+                ---
+
+            </div>
+
+            Ω
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     WHEATSTONE BRIDGE
+===================================================== -->
+
+<div class="card">
+
+    <h2>Wheatstone Bridge</h2>
+
+
+    <div class="wheatstone">
+
+
+        <!-- POWER -->
+
+        <div class="supply top-supply">
+
+            +5V
+
+        </div>
+
+
+        <!-- WIRES -->
+
+        <div class="wire wire-tl"></div>
+
+        <div class="wire wire-tr"></div>
+
+        <div class="wire wire-bl"></div>
+
+        <div class="wire wire-br"></div>
+
+
+        <div class="center-left"></div>
+
+        <div class="center-right"></div>
+
+
+        <div class="meter-line"></div>
+
+
+        <!-- NODES -->
+
+        <div
+            class="node node-top">
+        </div>
+
+
+        <div
+            class="node node-left">
+        </div>
+
+
+        <div
+            class="node node-right">
+        </div>
+
+
+        <div
+            class="node node-bottom">
+        </div>
+
+
+        <!-- R1 -->
+
+        <div
+            class="bridge-resistor resistor-r1">
+
+            <div class="resistor-symbol">
+
+                R1
+
+            </div>
+
+            <div class="resistor-value">
+
+                <span
+                    id="bridgeR1">
+
+                    ---
+
+                </span>
+
+                Ω
+
+            </div>
+
+        </div>
+
+
+        <!-- R2 -->
+
+        <div
+            class="bridge-resistor resistor-r2">
+
+            <div class="resistor-symbol">
+
+                R2
+
+            </div>
+
+            <div class="resistor-value">
+
+                <span
+                    id="bridgeR2">
+
+                    ---
+
+                </span>
+
+                Ω
+
+            </div>
+
+        </div>
+
+
+        <!-- R3 -->
+
+        <div
+            class="bridge-resistor resistor-r3">
+
+            <div class="resistor-symbol">
+
+                R3
+
+            </div>
+
+            <div class="resistor-value">
+
+                <span
+                    id="bridgeR3">
+
+                    ---
+
+                </span>
+
+                Ω
+
+            </div>
+
+        </div>
+
+
+        <!-- R4 -->
+
+        <div
+            class="bridge-resistor resistor-r4">
+
+            <div class="resistor-symbol">
+
+                R4
+
+            </div>
+
+            <div class="resistor-value">
+
+                <span
+                    id="bridgeR4">
+
+                    ---
+
+                </span>
+
+                Ω
+
+            </div>
+
+        </div>
+
+
+        <!-- CENTER METER -->
+
+        <div class="meter">
+
+            <div class="meter-title">
+
+                BRIDGE DIFFERENCE
+
+            </div>
+
+            <div
+                class="meter-value"
+                id="bridgeDifference">
+
+                ---
+
+            </div>
+
+        </div>
+
+
+        <!-- GROUND -->
+
+        <div class="ground">
+
+            <div class="ground-symbol">
+
+                ⏚
+
+            </div>
+
+            GND
+
+        </div>
+
+
+        <!-- RATIOS -->
+
+        <div class="bridge-info">
+
+
+            <div>
+
+                <span>
+                    R1 / R2
+                </span>
+
+                <strong
+                    id="ratio1">
+
+                    ---
+
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    R3 / R4
+                </span>
+
+                <strong
+                    id="ratio2">
+
+                    ---
+
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Difference
+                </span>
+
+                <strong
+                    id="bridgeDiff2">
+
+                    ---
+
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     SERVO CONTROL
+===================================================== -->
+
+<div class="card">
+
+    <h2>Servo Control</h2>
+
+
+    <div class="controller">
+
+
+        <button
+            class="arrow"
+            onclick="sendCommand('U')">
+
+            ⬆
+
+        </button>
+
+
+        <br>
+
+
+        <button
+            class="arrow"
+            onclick="sendCommand('L')">
+
+            ⬅
+
+        </button>
+
+
+        <button
+            class="arrow"
+            onclick="sendCommand('S')">
+
+            ⏹
+
+        </button>
+
+
+        <button
+            class="arrow"
+            onclick="sendCommand('R')">
+
+            ➡
+
+        </button>
+
+
+        <br>
+
+
+        <button
+            class="arrow"
+            onclick="sendCommand('D')">
+
+            ⬇
+
+        </button>
+
+
+        <div class="position">
+
+            Horizontal:
+
+            <span id="controllerH">
+
+                0
+
+            </span>°
+
+            <br>
+
+
+            Vertical:
+
+            <span id="controllerV">
+
+                15
+
+            </span>°
+
+        </div>
+
+
+        <p>
+
+            Select <strong>MANUAL</strong>
+            before using the arrows.
+
+        </p>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     SERIAL LOG
+===================================================== -->
+
+<div class="card">
+
+    <h2>Arduino Serial Monitor</h2>
+
+    <div id="log"></div>
+
+</div>
+
+
+</div>
+
+</div>
+
+
+
+<script>
+
+
+// =====================================================
+// SERIAL VARIABLES
+// =====================================================
+
+let port = null;
+
+let reader = null;
+
+let keepReading = false;
+
+let buffer = "";
+
+
+// =====================================================
+// CONNECT ARDUINO
+// =====================================================
+
+async function connectArduino() {
+
+    try {
+
+        if (!("serial" in navigator)) {
+
+            alert(
+                "Web Serial is not supported. Use Google Chrome or Microsoft Edge."
+            );
+
+            return;
+
+        }
+
+
+        port =
+            await navigator.serial.requestPort();
+
+
+        await port.open({
+
+            baudRate: 9600
+
+        });
+
+
+        document.getElementById(
+            "connection"
+        ).innerText =
+            "● Arduino Connected";
+
+
+        document.getElementById(
+            "connection"
+        ).style.color =
+            "#00ff88";
+
+
+        keepReading = true;
+
+
+        readSerial();
+
+    }
+
+    catch(error) {
+
+        console.error(error);
+
+
+        document.getElementById(
+            "connection"
+        ).innerText =
+            "Connection failed";
+
+
+        document.getElementById(
+            "connection"
+        ).style.color =
+            "#ff5555";
+
+    }
+
+}
+
+
+// =====================================================
+// READ SERIAL
+// =====================================================
+
+async function readSerial() {
+
+    const decoder =
+        new TextDecoderStream();
+
+
+    const inputDone =
+        port.readable.pipeTo(
+            decoder.writable
+        );
+
+
+    reader =
+        decoder.readable.getReader();
+
+
+    try {
+
+        while(keepReading) {
+
+            const {
+                value,
+                done
+            } =
+            await reader.read();
+
+
+            if(done) {
+
+                break;
+
+            }
+
+
+            if(value) {
+
+                buffer += value;
+
+            }
+
+
+            let lines =
+                buffer.split("\n");
+
+
+            buffer =
+                lines.pop();
+
+
+            for(
+                const line
+                of lines
+            ) {
+
+                processSerial(
+                    line.trim()
+                );
+
+            }
+
+        }
+
+    }
+
+    catch(error) {
+
+        console.error(error);
+
+    }
+
+}
+
+
+// =====================================================
+// PROCESS SERIAL DATA
+// =====================================================
+
+function processSerial(line) {
+
+
+    if(!line) {
+
+        return;
+
+    }
+
+
+    addLog(line);
+
+
+    // Ignore non-DATA messages
+
+    if(
+        !line.startsWith("DATA,")
+    ) {
+
+        return;
+
+    }
+
+
+    let data =
+        line.split(",");
+
+
+    if(data.length < 12) {
+
+        return;
+
+    }
+
+
+    let r1 =
+        parseFloat(data[1]);
+
+
+    let r2 =
+        parseFloat(data[2]);
+
+
+    let r3 =
+        parseFloat(data[3]);
+
+
+    let r4 =
+        parseFloat(data[4]);
+
+
+    let ratio1 =
+        parseFloat(data[5]);
+
+
+    let ratio2 =
+        parseFloat(data[6]);
+
+
+    let difference =
+        parseFloat(data[7]);
+
+
+    let posH =
+        parseInt(data[8]);
+
+
+    let posV =
+        parseInt(data[9]);
+
+
+    let balance =
+        data[10];
+
+
+    let mode =
+        data[11];
+
+
+    // =================================================
+    // LDR VALUES
+    // =================================================
+
+    document.getElementById(
+        "R1"
+    ).innerText =
+        Math.round(r1);
+
+
+    document.getElementById(
+        "R2"
+    ).innerText =
+        Math.round(r2);
+
+
+    document.getElementById(
+        "R3"
+    ).innerText =
+        Math.round(r3);
+
+
+    document.getElementById(
+        "R4"
+    ).innerText =
+        Math.round(r4);
+
+
+    // =================================================
+    // BRIDGE VALUES
+    // =================================================
+
+    document.getElementById(
+        "bridgeR1"
+    ).innerText =
+        Math.round(r1);
+
+
+    document.getElementById(
+        "bridgeR2"
+    ).innerText =
+        Math.round(r2);
+
+
+    document.getElementById(
+        "bridgeR3"
+    ).innerText =
+        Math.round(r3);
+
+
+    document.getElementById(
+        "bridgeR4"
+    ).innerText =
+        Math.round(r4);
+
+
+    // =================================================
+    // RATIOS
+    // =================================================
+
+    document.getElementById(
+        "ratio1"
+    ).innerText =
+        ratio1.toFixed(3);
+
+
+    document.getElementById(
+        "ratio2"
+    ).innerText =
+        ratio2.toFixed(3);
+
+
+    document.getElementById(
+        "difference"
+    ).innerText =
+        difference.toFixed(3);
+
+
+    document.getElementById(
+        "bridgeDifference"
+    ).innerText =
+        difference.toFixed(3);
+
+
+    document.getElementById(
+        "bridgeDiff2"
+    ).innerText =
+        difference.toFixed(3);
+
+
+    // =================================================
+    // BALANCE STATUS
+    // =================================================
+
+    let balanceElement =
+        document.getElementById(
+            "balance"
+        );
+
+
+    if(
+        balance === "BALANCED"
+    ) {
+
+        balanceElement.innerText =
+            "✓ BALANCED";
+
+
+        balanceElement.className =
+            "value balanced";
+
+    }
+
+    else {
+
+        balanceElement.innerText =
+            "✕ NOT BALANCED";
+
+
+        balanceElement.className =
+            "value not-balanced";
+
+    }
+
+
+    // =================================================
+    // MODE
+    // =================================================
+
+    document.getElementById(
+        "mode"
+    ).innerText =
+        mode;
+
+
+    // =================================================
+    // SERVO POSITIONS
+    // =================================================
+
+    document.getElementById(
+        "posH"
+    ).innerText =
+        posH + "°";
+
+
+    document.getElementById(
+        "posV"
+    ).innerText =
+        posV + "°";
+
+
+    document.getElementById(
+        "controllerH"
+    ).innerText =
+        posH;
+
+
+    document.getElementById(
+        "controllerV"
+    ).innerText =
+        posV;
+
+}
+
+
+// =====================================================
+// SEND COMMAND
+// =====================================================
+
+async function sendCommand(command) {
+
+
+    if(!port) {
+
+        alert(
+            "Connect the Arduino first."
+        );
+
+        return;
+
+    }
+
+
+    if(!port.writable) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const writer =
+            port.writable.getWriter();
+
+
+        const encoder =
+            new TextEncoder();
+
+
+        await writer.write(
+            encoder.encode(command)
+        );
+
+
+        writer.releaseLock();
+
+    }
+
+    catch(error) {
+
+        console.error(error);
+
+    }
+
+}
+
+
+// =====================================================
+// AUTO MODE
+// =====================================================
+
+function setAuto() {
+
+    sendCommand("A");
+
+}
+
+
+// =====================================================
+// MANUAL MODE
+// =====================================================
+
+function setManual() {
+
+    sendCommand("M");
+
+}
+
+
+// =====================================================
+// SERIAL LOG
+// =====================================================
+
+function addLog(text) {
+
+
+    const log =
+        document.getElementById(
+            "log"
+        );
+
+
+    const line =
+        document.createElement(
+            "div"
+        );
+
+
+    line.textContent =
+        text;
+
+
+    log.appendChild(line);
+
+
+    log.scrollTop =
+        log.scrollHeight;
+
+
+    // Keep last 150 messages
+
+    while(
+        log.children.length > 150
+    ) {
+
+        log.removeChild(
+            log.firstChild
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// KEYBOARD CONTROL
+// =====================================================
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+
+        if(
+            event.key === "ArrowUp"
+        ) {
+
+            event.preventDefault();
+
+            sendCommand("U");
+
+        }
+
+
+        else if(
+            event.key === "ArrowDown"
+        ) {
+
+            event.preventDefault();
+
+            sendCommand("D");
+
+        }
+
+
+        else if(
+            event.key === "ArrowLeft"
+        ) {
+
+            event.preventDefault();
+
+            sendCommand("L");
+
+        }
+
+
+        else if(
+            event.key === "ArrowRight"
+        ) {
+
+            event.preventDefault();
+
+            sendCommand("R");
+
+        }
+
+
+        else if(
+            event.key === " "
+        ) {
+
+            event.preventDefault();
+
+            sendCommand("S");
+
+        }
+
+    }
+
+);
+
+</script>
+
+
+</body>
+
+</html>
